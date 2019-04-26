@@ -16,24 +16,30 @@ Adafruit_NeoPixel pixels = Adafruit_NeoPixel(PixelCount, PIN);
 
   //***************************************** CHOOSE COLORS *************************************
 
-  // Colors/color names from https://materialuicolors.co/ - level 500
+  // Colors/color names from Material Design, https://materialuicolors.co/ - level 500
   
 //  uint32_t color1 = 0x03A9F4; // light blue
 // uint32_t color1 =  0x3F51B5; // indigo
-//  uint32_t color1 = 0xFF9800; // orange
- uint32_t color1 =  0x009688; // teal
+  uint32_t color1 = 0xFF9800; // orange
+// uint32_t color1 =  0x009688; // teal
   
 //  uint32_t color2 = 0xF44336; // red
   uint32_t color2 = 0xE91E63; // pink
 //  uint32_t color2 = 0xFFC107 ; // amber
 
-//  uint32_t  bkgrnd = 0x9E9E9E; // grey
-  uint32_t bkgrnd = 0x673AB7; // deep purpple
+  uint32_t  bkgrnd = 0x9E9E9E; // grey
+//  uint32_t bkgrnd = 0x673AB7; // deep purpple
 
   uint32_t myColors_patt0[] = 
     {color1, color1, color1, color1, 
     bkgrnd, bkgrnd, bkgrnd, bkgrnd, 
     color2, color2, color2, color2,
+    bkgrnd, bkgrnd, bkgrnd, bkgrnd};
+    
+   uint32_t myColors_patt2[] = 
+    {bkgrnd, bkgrnd, bkgrnd, bkgrnd, 
+    bkgrnd, bkgrnd, bkgrnd, bkgrnd, 
+    bkgrnd, bkgrnd, bkgrnd, bkgrnd,
     bkgrnd, bkgrnd, bkgrnd, bkgrnd};
 
   //********************************** CHOOSE PATTERN **********************************
@@ -43,7 +49,7 @@ Adafruit_NeoPixel pixels = Adafruit_NeoPixel(PixelCount, PIN);
     // 2: Drop fill
     // 3: Random twister
     
-    uint8_t  myPattern = 3; // ← Change this value to your desired pattern
+    uint8_t  myPattern = 2; // ← Change this value to your desired pattern
     
   //********************************** CHOOSE SPEED ********************************************
   
@@ -52,7 +58,7 @@ Adafruit_NeoPixel pixels = Adafruit_NeoPixel(PixelCount, PIN);
     // 2: SLOW 
     // 3: EXTRA SLOW (good for debugging!)
 
-    uint8_t mySpeed = 1; // ← Change this value to your desired speed
+    uint8_t mySpeed = 3; // ← Change this value to your desired speed
 
 
 //**********************************************************************************************
@@ -167,27 +173,40 @@ void loop() // after setup() runs, loop() will run over and over as long as the 
     
     case 2:
     
-      static int16_t d = 0; // the 'start' position each time the code loops
-      static int16_t e = 0; // ...
+      static int16_t d = 0; // index for the moving pixels
+      static int16_t start_pos = 0; // where to start moving
+      static int16_t end_pos = PixelCount-1; // where to stop moving
 
+      // initialise / reset all pixels with bkgrnd color
+      if (end_pos == PixelCount-1 && d == 0) {
+        for (uint8_t pixel_index = 0; pixel_index < PixelCount; pixel_index ++)  
+        {        
+           myColors_patt2[pixel_index] = bkgrnd;
+        }
+      }
+      
+      if (d == start_pos) { // start new light
+        
+        myColors_patt2[d] = color1;
+        
+      } else if (d <= end_pos) { // move color to next pos
+        
+        myColors_patt2[d-1] = bkgrnd;
+        myColors_patt2[d] = color1;
+        d ++;
+      
+      } else if (d >= end_pos) { // update start_pos and end_pos
+        
+        start_pos ++; 
+        end_pos -= 2; // every other pos in diff color
+        d = start_pos;
+      }
 
-//      uint32_t myColors_patt2[PixelCount];
-//      for (uint8_t pixel_index = 0; pixel_index < PixelCount; pixel_index ++)  
-//      {
-//        myColors_patt2[pixel_index] = bkgrnd; // Sets background color on every pixel
-//      }
-//
-//      for (uint8_t pixel_index = 0; pixel_index < PixelCount; pixel_index ++)  
-//      {        
-//        pixels.setPixelColor(pixel_index, bkgrnd); // Sets background color on every pixel
-//      }
-//
-//      pixels.setPixelColor(d, color1); // Sets color 1 on first pixel
-////      pixels.setPixelColor(PixelCount +1 - d, color2); // Sets color 2 on every other pixel
-//
-//
-//      d += 2; // color 1's pixel motion
-//      d %= PixelCount;
+      // show updated colors:
+      for (uint8_t pixel_index = 0; pixel_index < PixelCount; pixel_index ++)  
+      {        
+        pixels.setPixelColor(pixel_index, myColors_patt2[pixel_index]);
+      }
       
       pixels.show();
       delay(delayTime);
