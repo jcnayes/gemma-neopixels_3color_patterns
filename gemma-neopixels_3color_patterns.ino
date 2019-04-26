@@ -6,7 +6,9 @@
 #include <Adafruit_NeoPixel.h>
 
 #define PIN 0 // assign constant PIN to the pin D0~ on the Gemma
-static int PixelCount = 16 ; // 16-pixel ring, but easy to change for other sizes
+const int PixelCount = 16 ; // 16-pixel ring, but easy to change for other sizes
+
+uint32_t delayTime; // variable for timing
 
 Adafruit_NeoPixel pixels = Adafruit_NeoPixel(PixelCount, PIN);
 
@@ -15,32 +17,33 @@ Adafruit_NeoPixel pixels = Adafruit_NeoPixel(PixelCount, PIN);
 //**********************************************************************************************
 
   //***************************************** CHOOSE COLORS *************************************
-
+  // These 3-color patterns use two accent colors (color1, color2) and one background color (bkgrnd).
+  //
   // Colors/color names from Material Design, https://materialuicolors.co/ - level 500
   
-//  uint32_t color1 = 0x03A9F4; // light blue
-// uint32_t color1 =  0x3F51B5; // indigo
-  uint32_t color1 = 0xFF9800; // orange
-// uint32_t color1 =  0x009688; // teal
+//    uint32_t color1 = 0x03A9F4; // light blue
+    uint32_t color1 = 0x0000F4; // video blue
+//    uint32_t color1 =  0x3F51B5; // indigo
+//    uint32_t color1 = 0xFF9800; // orange
+//    uint32_t color1 =  0x009688; // teal
   
-//  uint32_t color2 = 0xF44336; // red
-  uint32_t color2 = 0xE91E63; // pink
-//  uint32_t color2 = 0xFFC107 ; // amber
+//   uint32_t color2 = 0xF44336; // red
+   uint32_t color2 = 0xF40000; // video red
+//    uint32_t color2 = 0xE91E63; // pink
+//    uint32_t color2 = 0xFFC107 ; // amber
 
-  uint32_t  bkgrnd = 0x9E9E9E; // grey
-//  uint32_t bkgrnd = 0x673AB7; // deep purpple
+    uint32_t  bkgrnd = 0x9E9E9E; // grey
+//   uint32_t bkgrnd = 0x673AB7; // deep purpple
 
-  uint32_t myColors_patt0[] = 
-    {color1, color1, color1, color1, 
-    bkgrnd, bkgrnd, bkgrnd, bkgrnd, 
-    color2, color2, color2, color2,
-    bkgrnd, bkgrnd, bkgrnd, bkgrnd};
-    
-   uint32_t myColors_patt2[] = 
-    {bkgrnd, bkgrnd, bkgrnd, bkgrnd, 
-    bkgrnd, bkgrnd, bkgrnd, bkgrnd, 
-    bkgrnd, bkgrnd, bkgrnd, bkgrnd,
-    bkgrnd, bkgrnd, bkgrnd, bkgrnd};
+
+          // Color set up for the various patterns
+          uint32_t myColors_patt0[] = 
+            {color1, color1, color1, color1, 
+            bkgrnd, bkgrnd, bkgrnd, bkgrnd, 
+            color2, color2, color2, color2,
+            bkgrnd, bkgrnd, bkgrnd, bkgrnd};
+            
+           uint32_t myColors_patt2[PixelCount];
 
   //********************************** CHOOSE PATTERN **********************************
 
@@ -49,7 +52,7 @@ Adafruit_NeoPixel pixels = Adafruit_NeoPixel(PixelCount, PIN);
     // 2: Drop fill
     // 3: Random twister
     
-    uint8_t  myPattern = 2; // ← Change this value to your desired pattern
+    uint8_t  myPattern = 1; // ← Change this value to your desired pattern
     
   //********************************** CHOOSE SPEED ********************************************
   
@@ -58,27 +61,18 @@ Adafruit_NeoPixel pixels = Adafruit_NeoPixel(PixelCount, PIN);
     // 2: SLOW 
     // 3: EXTRA SLOW (good for debugging!)
 
-    uint8_t mySpeed = 3; // ← Change this value to your desired speed
-
-
-//**********************************************************************************************
-// UTILITY VARIABLES
-//**********************************************************************************************
-  
-  uint32_t delayTime; // Utility variable for timing
-//  uint32_t color = 0xffffff; // default white
-  uint8_t positionInPattern = 0; // Current position of moving pattern
-//  uint8_t positionInColorChart = 0; // Current position within colour chart
+    uint8_t mySpeed = 1; // ← Change this value to your desired speed
+    
 
 //**********************************************************************************************
 // SETUP
 //**********************************************************************************************
-void setup() // setup() runs once
+void setup() 
 { 
   pixels.begin();
   randomSeed(analogRead(0));
   
-  pixels.setBrightness(20); // 1/5 brightness to save battery
+  pixels.setBrightness(30); // 1/5 brightness to save battery
   
     switch (mySpeed) // where the speed timings are set
     { 
@@ -102,9 +96,9 @@ void setup() // setup() runs once
 }
 
 //**********************************************************************************************
-// LOOP THAT WILL RUN OVER AND OVER
+// LOOP
 //**********************************************************************************************
-void loop() // after setup() runs, loop() will run over and over as long as the GEMMA has power
+void loop()
 {
   switch(myPattern) {
 
@@ -115,7 +109,7 @@ void loop() // after setup() runs, loop() will run over and over as long as the 
     case 0:
     
       static int16_t a = 0; // the 'start' position each time the code loops
-      static int16_t b = 4; // how far to 'bounce'
+      static int16_t bounce_size = 4; // how far to 'bounce'
       static boolean turn = true; // to flip direction of rotation
 
       for (uint8_t pixel_index = 0; pixel_index < PixelCount; pixel_index++)  //Sets color to each pixel position
@@ -125,7 +119,7 @@ void loop() // after setup() runs, loop() will run over and over as long as the 
 
       if (turn) {
         a++; // rotate start pixel counter-clockwise
-        if (a == b) {
+        if (a == bounce_size) {
           turn = false;
         }
       } else {
@@ -150,14 +144,15 @@ void loop() // after setup() runs, loop() will run over and over as long as the 
       static int16_t c = 0; // the 'start' position each time the code loops
 
       for (uint8_t pixel_index = 0; pixel_index < PixelCount; pixel_index += 2)  
-      {        
-        pixels.setPixelColor(pixel_index + 1, bkgrnd); // Sets background color on every other pixel
-        pixels.setPixelColor(pixel_index, color2); // Sets color 2 on every other pixel
+      {
+        // Sets background color and color 2 on every other pixel
+        pixels.setPixelColor(pixel_index + 1, bkgrnd);
+        pixels.setPixelColor(pixel_index, color2);
       }
 
-      pixels.setPixelColor(c, color1); // Sets color 1 on every other pixel
-      pixels.setPixelColor(PixelCount - c, color1); // Sets color 1 on every other pixel
-
+      // move color 1
+      pixels.setPixelColor(c, color1);
+      pixels.setPixelColor(PixelCount - c, color1);
 
       c += 2; // color 1's pixel motion
       c %= PixelCount;
@@ -168,7 +163,7 @@ void loop() // after setup() runs, loop() will run over and over as long as the 
       break;
 
     //**********************************************************************************************
-    // Case 2: Drop fill - WORK IN PROGRESS!!!!!
+    // Case 2: Drop fill
     //**********************************************************************************************
     
     case 2:
@@ -177,38 +172,37 @@ void loop() // after setup() runs, loop() will run over and over as long as the 
       static int16_t end_pos = PixelCount-1; // where to stop moving
       static int16_t d = 0; // index for the moving pixels
 
-      for (uint8_t e = 0; e < PixelCount; e ++)  
+      for (uint8_t i = 0; i < PixelCount; i ++)
       {
-        if (e < start_pos) {
-          myColors_patt2[e] = color2;
-        } else if (e > end_pos) {
-          myColors_patt2[e] = color1;
-        } else if (e == (start_pos + d)) {
-          myColors_patt2[e] = color1;
-        } else if (e == (end_pos - d)) {
-          myColors_patt2[e] = color2;
+        if (i < start_pos) {
+          myColors_patt2[i] = color2;
+        } else if (i > end_pos) {
+          myColors_patt2[i] = color1;
+        } else if (i == (start_pos + d)) {
+          myColors_patt2[i] = color1;
+        } else if (i == (end_pos - d)) {
+          myColors_patt2[i] = color2;
         } else {
-          myColors_patt2[e] = bkgrnd;
+          myColors_patt2[i] = bkgrnd;
         }
       }
       
       d ++;
       
-      if (d >= end_pos) { // update start_pos and end_pos
+      if (d >= (end_pos - start_pos)) {
         
         start_pos ++; 
         end_pos --;
-        d = start_pos;
+        d = 0;
 
-        if (start_pos >= end_pos) { // reset cycle
+        if (start_pos >= end_pos) {
+          // reset cycle
           start_pos = 0;
           end_pos = PixelCount-1;
         }
-        
-        d = 0;
       }
 
-      // show updated colors:
+      // show updated colors
       for (uint8_t pixel_index = 0; pixel_index < PixelCount; pixel_index ++)  
       {        
         pixels.setPixelColor(pixel_index, myColors_patt2[pixel_index]);
@@ -227,12 +221,13 @@ void loop() // after setup() runs, loop() will run over and over as long as the 
       
       static int16_t f = 0; // the 'start' position each time the code loops
       static int16_t g = 0; // track along magnitude
-      static int16_t magnitude =  10; // how far to twist
+      static int16_t magnitude =  PixelCount/3; // how far to twist, will be randomized later
       static boolean twist = true; // to flip direction of rotation
 
       for (int8_t pixel_index = 0; pixel_index < PixelCount; pixel_index ++) {
         
         int temp = (pixel_index + f) % PixelCount;
+        
         if (temp < 0 ) temp += PixelCount;
         
         if (pixel_index % 4 == 0) {
@@ -241,15 +236,15 @@ void loop() // after setup() runs, loop() will run over and over as long as the 
         else if (pixel_index % 4 == 1) {
           pixels.setPixelColor(temp, color2); 
         }
-          else {
+        else {
           pixels.setPixelColor(temp, bkgrnd); 
         }
       }
 
       if (twist) {
-        f++; // rotate start pixel counter-clockwise
+        f++; // rotate counter-clockwise
       } else {
-        f--; // rotate start pixel clockwise
+        f--; // rotate clockwise
       }
       
       g++; // track twist 'position'
@@ -272,4 +267,4 @@ void loop() // after setup() runs, loop() will run over and over as long as the 
       break;
 
   } // end of pattern switcher
-}
+} // end of loop
