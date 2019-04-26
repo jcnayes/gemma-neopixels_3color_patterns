@@ -52,7 +52,7 @@ Adafruit_NeoPixel pixels = Adafruit_NeoPixel(PixelCount, PIN);
     // 2: Drop fill
     // 3: Random twister
     
-    uint8_t  myPattern = 1; // ← Change this value to your desired pattern
+    uint8_t  myPattern = 2; // ← Change this value to your desired pattern
     
   //********************************** CHOOSE SPEED ********************************************
   
@@ -72,7 +72,7 @@ void setup()
   pixels.begin();
   randomSeed(analogRead(0));
   
-  pixels.setBrightness(30); // 1/5 brightness to save battery
+  pixels.setBrightness(20); // 1/5 brightness to save battery
   
     switch (mySpeed) // where the speed timings are set
     { 
