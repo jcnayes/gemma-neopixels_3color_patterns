@@ -173,9 +173,9 @@ void loop() // after setup() runs, loop() will run over and over as long as the 
     
     case 2:
     
-      static int16_t d = 0; // index for the moving pixels
       static int16_t start_pos = 0; // where to start moving
       static int16_t end_pos = PixelCount-1; // where to stop moving
+      static int16_t d = 0; // index for the moving pixels
 
       // initialise / reset all pixels with bkgrnd color
       if (end_pos == PixelCount-1 && d == 0) {
@@ -189,18 +189,28 @@ void loop() // after setup() runs, loop() will run over and over as long as the 
         
         myColors_patt2[d] = color1;
         
-      } else if (d <= end_pos) { // move color to next pos
+      }
+      
+      if (d <= end_pos) { // move color to next pos
         
         myColors_patt2[d-1] = bkgrnd;
         myColors_patt2[d] = color1;
         d ++;
       
-      } else if (d >= end_pos) { // update start_pos and end_pos
+      } 
+      
+      if (d >= end_pos) { // update start_pos and end_pos
         
         start_pos ++; 
         end_pos -= 2; // every other pos in diff color
         d = start_pos;
       }
+
+//      if (start_pos >= end_pos) { // reset cycle
+//        start_pos = 0;
+//        end_pos = PixelCount-1;
+//        d = 0;
+//      }
 
       // show updated colors:
       for (uint8_t pixel_index = 0; pixel_index < PixelCount; pixel_index ++)  
