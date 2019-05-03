@@ -20,3 +20,7 @@ Pattern 2 - 3:
 
 ![](3_color_patterns_2.gif)
 ![](3_color_patterns_3.gif)
+
+Pattern 4:
+
+![](3_color_patterns_4.gif)
