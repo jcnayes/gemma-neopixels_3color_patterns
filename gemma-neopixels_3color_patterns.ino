@@ -12,6 +12,11 @@ uint32_t delayTime; // variable for timing
 
 Adafruit_NeoPixel pixels = Adafruit_NeoPixel(PixelCount, PIN);
 
+// Used in pattern cases 2 and 4:
+int16_t start_pos = 0; // where to start moving
+int16_t end_pos = PixelCount-1; // where to stop moving
+int16_t d = 0; // index for the moving pixels
+
 //**********************************************************************************************
 // MODIFIABLE PARAMETERS - PERSONALIZE YOUR GEMMA NEOPIXELS HERE
 //**********************************************************************************************
@@ -22,18 +27,20 @@ Adafruit_NeoPixel pixels = Adafruit_NeoPixel(PixelCount, PIN);
   // Colors/color names from Material Design, https://materialuicolors.co/ - level 500
   
 //    uint32_t color1 = 0x03A9F4; // light blue
-    uint32_t color1 = 0x0000F4; // video blue
 //    uint32_t color1 =  0x3F51B5; // indigo
 //    uint32_t color1 = 0xFF9800; // orange
-//    uint32_t color1 =  0x009688; // teal
+    uint32_t color1 =  0x009688; // teal
   
 //   uint32_t color2 = 0xF44336; // red
-   uint32_t color2 = 0xF40000; // video red
-//    uint32_t color2 = 0xE91E63; // pink
+    uint32_t color2 = 0xE91E63; // pink
 //    uint32_t color2 = 0xFFC107 ; // amber
 
     uint32_t  bkgrnd = 0x9E9E9E; // grey
 //   uint32_t bkgrnd = 0x673AB7; // deep purpple
+
+
+//    uint32_t color1 = 0x0000F4; // video blue (to make gif, & use brightness 40?)
+//   uint32_t color2 = 0xF40000; // video red
 
 
           // Color set up for the various patterns
@@ -51,8 +58,9 @@ Adafruit_NeoPixel pixels = Adafruit_NeoPixel(PixelCount, PIN);
     // 1: Flag merge
     // 2: Drop fill
     // 3: Random twister
+    // 4: Drop fill- alternating
     
-    uint8_t  myPattern = 2; // ← Change this value to your desired pattern
+    uint8_t  myPattern = 4; // ← Change this value to your desired pattern
     
   //********************************** CHOOSE SPEED ********************************************
   
@@ -93,7 +101,7 @@ void setup()
       break;
     }  
     
-}
+} // end of setup()
 
 //**********************************************************************************************
 // LOOP
@@ -167,10 +175,6 @@ void loop()
     //**********************************************************************************************
     
     case 2:
-    
-      static int16_t start_pos = 0; // where to start moving
-      static int16_t end_pos = PixelCount-1; // where to stop moving
-      static int16_t d = 0; // index for the moving pixels
 
       for (uint8_t i = 0; i < PixelCount; i ++)
       {
@@ -266,5 +270,69 @@ void loop()
       
       break;
 
+    //**********************************************************************************************
+    // Case 4: Drop fill- alternating - WORK IN PROGRESS!!!! only copied from patt 2...
+    //**********************************************************************************************
+    
+    case 4:
+
+      for (uint8_t i = 0; i < PixelCount; i ++)
+      {
+        if (i < start_pos || i > end_pos) {
+          
+          if (i %2 == 0) {
+            myColors_patt2[i] = color2;
+          } else {
+            myColors_patt2[i] = color1;
+          }
+          
+        } else if (i == (start_pos + d)) {
+          
+          if (start_pos %2 == 0) {
+            myColors_patt2[i] = color1;
+          } else {
+            myColors_patt2[i] = color2;
+          }
+          
+        } else if (i == (end_pos - d)) {
+          
+          if (start_pos %2 == 0) {
+            myColors_patt2[i] = color2;
+          } else {
+            myColors_patt2[i] = color1;
+          }
+          
+        } else {
+          
+          myColors_patt2[i] = bkgrnd;
+        }
+      }
+      
+      d ++;
+      
+      if (d > (end_pos - start_pos)) {
+        
+        start_pos ++; 
+        end_pos --;
+        d = 0;
+
+        if (start_pos >= end_pos) {
+          // reset cycle
+          start_pos = 0;
+          end_pos = PixelCount-1;
+        }
+      }
+
+      // show updated colors
+      for (uint8_t pixel_index = 0; pixel_index < PixelCount; pixel_index ++)  
+      {        
+        pixels.setPixelColor(pixel_index, myColors_patt2[pixel_index]);
+      }
+      
+      pixels.show();
+      delay(delayTime);
+      
+      break;
+
   } // end of pattern switcher
-} // end of loop
+} // end of loop()
